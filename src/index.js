@@ -35,7 +35,7 @@ app.post('/users', (request, response) => {
     todos: [],
   });
 
-  return response.json({ message: 'Usuário cadastrado com sucesso!', error: false });
+  return response.status(201).json({ message: 'Usuário cadastrado com sucesso!', error: false });
 });
 
 app.get('/users', (request, response) => {
@@ -49,7 +49,9 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username, body: title, deadline } = request;
+
+  console.log('Title: ', title);
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
