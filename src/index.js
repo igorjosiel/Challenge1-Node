@@ -49,9 +49,22 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
-  const { username, body: title, deadline } = request;
+  const { user } = request;
+  const {title, deadline} = request.body;
 
-  console.log('Title: ', title);
+  if (!title || !deadline) {
+    return response.status(400).json({ message: 'Você precisa enviar os dados para o cadastro!', error: true });
+  }
+
+  user.todos.push({
+    id: uuidv4(),
+    title,
+    done: false,
+    deadline: new Date(deadline),
+    created_at: new Date(),
+  });
+
+  return response.status(200).json({ data: user.todos[user.todos.length - 1], error: false});
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
