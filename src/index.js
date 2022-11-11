@@ -14,7 +14,7 @@ function checksExistsUserAccount(request, response, next) {
 
   const user = users.find(user => user.username === username);
 
-  if (!user) return response.status(400).json({ message: 'Usuário não encontrado!', error: true });
+  if (!user) return response.status(404).json({ error: 'User not found!' });
 
   request.user = user;
   
@@ -24,28 +24,36 @@ function checksExistsUserAccount(request, response, next) {
 app.post('/users', (request, response) => {
   const { name, username } = request.body;
 
-  if (!name || !username) {
-    return response.json({ message: 'Você precisa enviar os dados para o cadastro!', error: true });
+  const userExists = users.find(user => user.username === username);
+
+  if (userExists) {
+    return response.status(400).json({ error: 'Username already exists!' });
   }
-  
-  users.push({
+
+  if (!name || !username) {
+    return response.json({ error: 'Você precisa enviar os dados para o cadastro!' });
+  }
+
+  const user = {
     id: uuidv4(),
     name,
     username,
     todos: [],
-  });
+  }
+  
+  users.push(user);
 
-  return response.status(201).json({ message: 'Usuário cadastrado com sucesso!', error: false });
+  return response.status(201).json(user);
 });
 
 app.get('/users', (request, response) => {
-  return response.json({ data: users, error: false });
+  return response.json(users);
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
   const { user } = request;
 
-  return response.status(200).json({ data: user.todos, error: false});
+  return response.status(200).json(user.todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
@@ -53,22 +61,38 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   const {title, deadline} = request.body;
 
   if (!title || !deadline) {
-    return response.status(400).json({ message: 'Você precisa enviar os dados para o cadastro!', error: true });
+    return response.status(400).json({ error: 'Você precisa enviar os dados para o cadastro!' });
   }
 
-  user.todos.push({
+  const todo = {
     id: uuidv4(),
     title,
     done: false,
     deadline: new Date(deadline),
     created_at: new Date(),
-  });
+  }
 
-  return response.status(200).json({ data: user.todos[user.todos.length - 1], error: false});
+  user.todos.push(todo);
+
+  return response.status(201).json(todo);
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+  const {title, deadline} = request.body;
+  const { id } = request.params;
+
+  if (!id) {
+    return response.status(400).json({ message: 'Você precisa enviar o código do usuário para a alteração!', error: true });
+  }
+
+  const foundUser = users.filter(user => user.todos.id === id);
+
+  console.log('foundUser: ', foundUser);
+
+  if (foundUser.length > 0) {
+    
+  }
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
